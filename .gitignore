@@ -5,3 +5,9 @@
 log
 training/.DS_Store
 notebooks/.ipynb_checkpoints/
+__pycache__/
+dataset_shapenet/
+extension
+*.pkl
+figures
+.ipynb_checkpoints/

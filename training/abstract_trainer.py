@@ -15,7 +15,7 @@ class AbstractTrainer(object):
         self.start_time = time.time()
         self.opt = opt
         self.git_repo_path = ""
-        self.start_visdom()
+        # self.start_visdom()
         self.get_log_paths()
         self.init_meters()
         self.reset_epoch()

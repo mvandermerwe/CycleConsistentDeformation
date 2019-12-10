@@ -21,6 +21,7 @@ import ICP
 import tqdm
 from save_mesh_from_points_and_labels import *
 import figure_2_3
+import pdb
 
 opt = argument_parser.parser()
 
@@ -177,6 +178,9 @@ for category in opt.categories:
     iterator = trainer.dataloader_test.__iter__()
     with torch.no_grad():
         for i in tqdm.tqdm(range(trainer.len_dataset_test)):
+
+            # pdb.set_trace()
+            
             try:
                 P2, _, _, P2_path = trainer.dataset_test[i]
                 P2_label = P2[:, 6].data.cpu().numpy()
@@ -242,6 +246,7 @@ for category in opt.categories:
             P2_P0_list = list(
                 map(lambda x: loss.forward_chamfer(trainer.network, x, P2, local_fix=None, distChamfer=distChamfer),
                     points_train_list))
+            pdb.set_trace()
             predicted_ours_P2_P0_list = list(
                 map(lambda x, y: x.view(-1)[y[4].view(-1).data.long()].view(1, -1), labels_train_list, P2_P0_list))
             iou_ours_list = list(

@@ -2,6 +2,13 @@
 # TODO : rename file to dataset_shapenet.py
 
 from __future__ import print_function
+import sys
+sys.path.append("./auxiliary/")
+sys.path.append("./extension/")
+sys.path.append("./training/")
+sys.path.append("./inference/")
+sys.path.append("./scripts/")
+sys.path.append("./")
 import torch.utils.data as data
 import os.path
 import json
@@ -17,7 +24,8 @@ import time
 import normalize_points
 import torch
 import useful_losses as loss
-
+import pdb
+import visualization as vis
 
 def unwrap_self(arg, **kwarg):
     return arg[0]._getitem(*(arg[1:]), **kwarg)
@@ -110,6 +118,9 @@ class ShapeNetSeg(data.Dataset):
             with open(os.path.join(os.path.join(self.root, "train_test_split"), 'shuffled_test_file_list.json')) as f:
                 file_list = file_list + json.load(f)
                 self.len_test = len(file_list) - self.len_train - self.len_val
+        if self.mode == "MEMORIZE":
+            with open(os.path.join(os.path.join(self.root, "train_test_split"), 'memorize.json')) as f:
+                file_list = json.load(f)
 
         for file in file_list:
             # Typical example : shape_data/03001627/355fa0f35b61fdd7aa74a6b5ee13e775 so remove 'shape_data/' and add '.txt'
@@ -138,6 +149,7 @@ class ShapeNetSeg(data.Dataset):
         for cat in self.meta.keys():
             self.perCatValueMeter[cat] = AverageValueMeter()
         # ----------------------------------------------------------#
+
         try:
             with open(os.path.join(self.root, 'parts_by_cat_' + str(class_choice) + '.json'), 'r') as fp:
                 self.part_category = json.load(fp)
@@ -161,6 +173,7 @@ class ShapeNetSeg(data.Dataset):
             self.normalization_function = normalize_points.identity
 
         self.preprocess()
+
         if self.knn:
             start = time.time()
             my_utils.red_print(
@@ -231,7 +244,7 @@ class ShapeNetSeg(data.Dataset):
                         se.parallel.dispatch_next()
 
             joblib.parallel.BatchCompletionCallBack = BatchCompletionCallBack
-            self.datas = Parallel(n_jobs=-1, backend="multiprocessing")(
+            self.datas = Parallel(n_jobs=1, backend="multiprocessing")(
                 delayed(unwrap_self)(i) for i in zip([self] * self.__len__(), range(self.__len__())))
 
             with open(self.path_dataset + ".pkl", "wb") as fp:  # Pickling
@@ -313,8 +326,13 @@ if __name__ == '__main__':
     print('Testing Shapenet dataloader')
 
     d = ShapeNetSeg(mode="TEST", knn=False, sample=False, class_choice="Chair",
-                    data_augmentation_Z_rotation=True, data_augmentation_Z_rotation_range=40, npoints=400,
-                    random_translation=True, anisotropic_scaling=True, shuffle=True)
+                    data_augmentation_Z_rotation=False, data_augmentation_Z_rotation_range=40, npoints=400,
+                    random_translation=False, anisotropic_scaling=False, shuffle=True)
+
+    vis.visualize_points(d[0][0][:3], show=True)
+
+    pdb.set_trace()
+    
     print(d.shuffle_list)
 
     # d = ShapeNetSeg(mode="TEST", knn=False, sample=False, class_choice="Chair",

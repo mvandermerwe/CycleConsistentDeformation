@@ -1,7 +1,9 @@
 import _thread as thread
 import visdom
 import os
-
+import matplotlib
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Visualizer(object):
     def __init__(self, port, env):
@@ -25,3 +27,26 @@ class Visualizer(object):
             self.vis.scatter(
                 X=points, Y=Y, win=title, opts=dict(title=title, markersize=2)
             )
+
+def visualize_points(points, bound=0.5, c=None, out_file=None, show=False):
+    fig = plt.figure()
+    
+    ax = fig.add_subplot(111, projection='3d')
+
+    if len(points) != 0:
+        ax.scatter(points[:, 0], points[:, 1], points[:, 2], c=c)
+
+    ax.set_xlim3d(-bound, bound)
+    ax.set_ylim3d(-bound, bound)
+    ax.set_zlim3d(-bound, bound)
+    ax.set_xlabel('Z')
+    ax.set_ylabel('X')
+    ax.set_zlabel('Y')
+    ax.view_init(elev=30, azim=45)
+
+    if out_file is not None:
+        plt.savefig(out_file)
+    if show:
+        plt.show()
+
+    plt.close(fig)

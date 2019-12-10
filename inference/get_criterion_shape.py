@@ -14,7 +14,7 @@ sys.path.append("./training/")
 sys.path.append("./inference/")
 sys.path.append("./")
 import argument_parser
-from auxiliary.utils import *
+# from auxiliary.utils import *
 from auxiliary.model_atlasnet import *
 import miou_shape
 import useful_losses as loss
@@ -24,7 +24,7 @@ import get_shapenet_model
 import normalize_points
 import trainer as t
 import pprint
-import forward_source_target
+import forward_input_target
 
 def get_criterion_shape(opt):
     return_dict = {}
@@ -143,5 +143,5 @@ if __name__ == '__main__':
     for key in return_dict:
         opt.eval_source = return_dict[key]
         opt.eval_target = opt.eval_get_criterions_for_shape
-        forward_source_target.forward(opt)
+        forward_input_target.forward(opt)
     pprint.pprint(return_dict)

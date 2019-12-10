@@ -25,7 +25,7 @@ import high_frequencies
 import torch
 import figure_2_3
 import os
-
+import pdb
 
 def forward(opt):
     """
@@ -34,6 +34,8 @@ def forward(opt):
     :return:
     """
     my_utils.plant_seeds(randomized_seed=opt.randomize)
+
+    pdb.set_trace()
 
     trainer = t.Trainer(opt)
     trainer.build_dataset_train_for_matching()
