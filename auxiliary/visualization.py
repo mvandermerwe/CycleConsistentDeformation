@@ -1,7 +1,6 @@
 import _thread as thread
 import visdom
 import os
-import matplotlib
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -29,6 +28,10 @@ class Visualizer(object):
             )
 
 def visualize_points(points, bound=0.5, c=None, out_file=None, show=False):
+    if not show:
+        import matplotlib
+        matplotlib.use('Agg')
+    
     fig = plt.figure()
     
     ax = fig.add_subplot(111, projection='3d')
@@ -49,4 +52,63 @@ def visualize_points(points, bound=0.5, c=None, out_file=None, show=False):
     if show:
         plt.show()
 
+    plt.close(fig)
+
+def visualize_points_multi(point_sets, cs=None, bound=0.5, out_file=None, show=False):
+    ''' Visualizes a set of points by plotting each next to each other.
+
+    Args:
+        point_sets (tensor): list of point cloud data tensors/arrays.
+        bound (float): upper/lower bound for the axes.
+    '''
+    if not show:
+        import matplotlib
+        matplotlib.use('Agg')
+    
+    num_sets = len(point_sets)
+
+    if cs is None:
+        cs = [None] * num_sets
+
+    # Setup figures for each.
+    fig = plt.figure()
+
+    for i, s in enumerate(range(num_sets)):
+        ax = fig.add_subplot(1, num_sets, s+1, projection='3d')
+        ax.scatter(point_sets[i][:, 0], point_sets[i][:, 1], point_sets[i][:, 2], c=cs[i])
+        ax.set_xlim3d(-bound, bound)
+        ax.set_ylim3d(-bound, bound)
+        ax.set_zlim3d(-bound, bound)
+
+    if out_file is not None:
+        plt.savefig(out_file)
+    if show:
+        plt.show()
+    plt.close(fig)
+
+def visualize_points_overlay(point_sets, bound=0.5, out_file=None, show=False):
+    ''' Visualizes a set of points by overlaying w/ different colors.
+    This is especially helpful for ensuring that training data is setup accurately.
+
+    Args:
+        point_sets (tensor): list of point cloud data tensors/arrays.
+        bound (float): upper/lower bound for the axes.
+    '''
+    num_sets = len(point_sets)
+    colors = ['red', 'blue', 'yellow', 'orange', 'green']
+    assert(num_sets <= len(colors))
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for i, s in enumerate(range(num_sets)):
+        ax.scatter(point_sets[i][:, 0], point_sets[i][:, 1], point_sets[i][:, 2], c=colors[i])
+
+    ax.set_xlim3d(-bound, bound)
+    ax.set_ylim3d(-bound, bound)
+    ax.set_zlim3d(-bound, bound)
+
+    if out_file is not None:
+        plt.savefig(out_file)
+    if show:
+        plt.show()
     plt.close(fig)

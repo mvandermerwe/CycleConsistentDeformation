@@ -325,15 +325,20 @@ class ShapeNetSeg(data.Dataset):
 if __name__ == '__main__':
     print('Testing Shapenet dataloader')
 
-    d = ShapeNetSeg(mode="TEST", knn=False, sample=False, class_choice="Chair",
-                    data_augmentation_Z_rotation=False, data_augmentation_Z_rotation_range=40, npoints=400,
-                    random_translation=False, anisotropic_scaling=False, shuffle=True)
+    # d = ShapeNetSeg(mode="TEST", knn=False, sample=False, class_choice="Chair",
+    #                 data_augmentation_Z_rotation=False, data_augmentation_Z_rotation_range=40, npoints=400,
+    #                 random_translation=False, anisotropic_scaling=False, shuffle=True)
 
-    vis.visualize_points(d[0][0][:3], show=True)
+    # vis.visualize_points(d[0][0][:3], show=True)
 
+    d = ShapeNetSeg(mode="TRAIN", knn=False, sample=True, class_choice="Chair",
+                    data_augmentation_Z_rotation=False, npoints=400,
+                    random_translation=False, anisotropic_scaling=False,
+                    shuffle=False, get_single_shape=False)
+
+    vis.visualize_points(d[0][0][:, :3], bound=1.0, show=True)
+    vis.visualize_points(d[0][4][:, :3], bound=1.0, show=True)
     pdb.set_trace()
-    
-    print(d.shuffle_list)
 
     # d = ShapeNetSeg(mode="TEST", knn=False, sample=False, class_choice="Chair",
     #                 data_augmentation_Z_rotation=True, data_augmentation_Z_rotation_range=40, npoints=400,

@@ -1,5 +1,5 @@
 import argparse
-import auxiliary.my_utils as my_utils
+import my_utils as my_utils
 import os
 import datetime
 
@@ -51,14 +51,17 @@ def parser():
     )
     # Data
     parser.add_argument('--cat', type=str, default="Car", help='Shapenet Category')
-    parser.add_argument('--number_points', type=int, default=2500, help='Number of point sampled on the object')
-    parser.add_argument('--knn', type=int, default=1, choices=[0, 1],
+    parser.add_argument('--number_points', type=int, default=1024, help='Number of point sampled on the object')
+    parser.add_argument('--knn', type=int, default=0, choices=[0, 1],
                         help='Use knn or not to sample a triplet training sample')
     parser.add_argument('--num_neighbors', type=int, default=20, help='Number of neighbors computed for knn')
     parser.add_argument('--anisotropic_scaling', type=int, default=1, )
     parser.add_argument('--normalization', type=str, default="BoundingBox",
                         choices=['UnitBall', 'BoundingBox_2', 'BoundingBox'], help='Type of normalization used')
     parser.add_argument('--mode', type=str, default="TRAIN", choices=['TRAIN', 'ALLDATA', 'Fine_tune_test'], )
+
+    # Data args for using ddn dataset.
+    parser.add_argument('--ddn_config', type=str, help='File path to the config for the ddn dataset to train against.')
 
     # Save dirs and reload
     parser.add_argument('--logdir', type=str, default="unsup_car_knn", help='name of the save folder')
@@ -69,7 +72,7 @@ def parser():
     parser.add_argument('--skip_connections', type=int, default=0, choices=[0, 1], help='Use skip connections')
     parser.add_argument('--hidden_sizes', default=[64, 64, 64, 64, 64, 64], nargs='+', type=int)
     parser.add_argument('--resnet_layers', default=False, type=int)
-    parser.add_argument('--display', default=1, type=int)
+    parser.add_argument('--display', default=0, type=int)
     parser.add_argument('--encoder_type', type=str, default="Pointnet", )
     parser.add_argument('--reload', type=int, default=0, choices=[0, 1], )
 

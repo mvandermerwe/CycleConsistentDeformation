@@ -1,4 +1,5 @@
 import torch
+import pdb
 import useful_losses as loss
 
 class TripletPointCloud:
@@ -21,6 +22,7 @@ class TripletPointCloud:
         self.label2 = self.P2[:, :, 6].contiguous()
         self.label3 = self.P3[:, :, 6].contiguous()
         self.batchs = self.P1.size(0)
+        # print("Batches: " + str(self.batchs))
 
         self.P1 = self.P1[:, :, :3].contiguous().cuda().float()
         self.P2 = self.P2[:, :, :3].contiguous().cuda().float()

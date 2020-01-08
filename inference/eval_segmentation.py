@@ -246,7 +246,7 @@ for category in opt.categories:
             P2_P0_list = list(
                 map(lambda x: loss.forward_chamfer(trainer.network, x, P2, local_fix=None, distChamfer=distChamfer),
                     points_train_list))
-            pdb.set_trace()
+
             predicted_ours_P2_P0_list = list(
                 map(lambda x, y: x.view(-1)[y[4].view(-1).data.long()].view(1, -1), labels_train_list, P2_P0_list))
             iou_ours_list = list(

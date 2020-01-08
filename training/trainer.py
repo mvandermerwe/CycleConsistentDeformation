@@ -1,9 +1,11 @@
 import torch
 import torch.optim as optim
 import time
+import sys
+import os
 import my_utils
 import model
-import extension.get_chamfer as get_chamfer
+import get_chamfer as get_chamfer
 import dataset_shapenet
 from termcolor import colored
 import miou_shape
@@ -11,14 +13,23 @@ import triplet_point_cloud
 import couple_point_cloud
 import useful_losses as loss
 from abstract_trainer import AbstractTrainer
+import pdb
+
+# Import DDN dataset things.
+sys.path.append(os.environ['DDN_HOME'])
+from im2mesh import config
 
 class Trainer(AbstractTrainer):
-    def __init__(self, opt):
+    def __init__(self, opt, test=False):
         super().__init__(opt)
         self.init_fix()
         self.print_loss_info()
         self.git_repo_path = "https://github.com/ThibaultGROUEIX/CycleConsistentDeformation/commit/"
         self.init_save_dict(opt)
+
+        self.ddn_config = config.load_config(self.opt.ddn_config, os.path.join(os.environ['DDN_HOME'], 'configs/default.yaml'))
+        if test:
+            self.ddn_config['training']['cycle_length'] = 1
 
 
     def print_loss_info(self):
@@ -42,6 +53,7 @@ class Trainer(AbstractTrainer):
         network.apply(my_utils.weights_init)  # initialization of the weight
         if self.opt.model != "":
             try:
+                # pdb.set_trace()
                 network.load_state_dict(torch.load(self.opt.model))
                 print(" Previous network weights loaded! From ", self.opt.model)
             except:
@@ -61,33 +73,30 @@ class Trainer(AbstractTrainer):
         """
         Create training dataset
         """
-        self.dataset_train = dataset_shapenet.ShapeNetSeg(mode=self.opt.mode,
-                                                                               knn=self.opt.knn,
-                                                                               num_neighbors=self.opt.num_neighbors,
-                                                                               normalization=self.opt.normalization,
-                                                                               class_choice=self.opt.cat,
-                                                                               data_augmentation_Z_rotation=True,
-                                                                               data_augmentation_Z_rotation_range=40,
-                                                                               anisotropic_scaling=self.opt.anisotropic_scaling,
-                                                                               npoints=self.opt.number_points,
-                                                                               random_translation=True)
+        # self.dataset_train = dataset_shapenet.ShapeNetSeg(mode="MEMORIZE",
+        #                                                   class_choice=self.opt.cat,
+        #                                                   npoints=self.opt.number_points)
+
+        self.dataset_train = config.get_dataset('train', self.ddn_config)
+
         self.dataloader_train = torch.utils.data.DataLoader(self.dataset_train, batch_size=self.opt.batch_size,
                                                             shuffle=True, num_workers=int(self.opt.workers),
                                                             drop_last=True)
+
         self.len_dataset = len(self.dataset_train)
+        print(self.len_dataset)
 
 
     def build_dataset_test(self):
         """
         Create testing dataset
         """
-        self.dataset_test = dataset_shapenet.ShapeNetSeg(mode="TEST",
-                                                                              normalization=self.opt.normalization,
-                                                                              class_choice=self.opt.cat,
-                                                                              data_augmentation_Z_rotation=False,
-                                                                              data_augmentation_Z_rotation_range=40,
-                                                                              npoints=self.opt.number_points,
-                                                                              random_translation=False)
+        # self.dataset_test = dataset_shapenet.ShapeNetSeg(mode="MEMORIZE",
+        #                                                  class_choice=self.opt.cat,
+        #                                                  npoints=self.opt.number_points)
+
+        self.dataset_test = config.get_dataset('val', self.ddn_config)
+        
         self.dataloader_test = torch.utils.data.DataLoader(self.dataset_test, batch_size=self.opt.batch_size,
                                                            shuffle=False, num_workers=int(self.opt.workers),
                                                            drop_last=True)
@@ -98,15 +107,15 @@ class Trainer(AbstractTrainer):
         Create training dataset for matching used at inference
         """
         self.dataset_train = dataset_shapenet.ShapeNetSeg(mode="TRAIN", knn=False,
-                                                                               normalization=self.opt.normalization,
-                                                                               class_choice=self.opt.cat,
-                                                                               npoints=self.opt.number_points_eval,
-                                                                               data_augmentation_Z_rotation=False,
-                                                                               anisotropic_scaling=False,
-                                                                               sample=False,
-                                                                               shuffle=self.opt.randomize,
-                                                                               random_translation=False,
-                                                                               get_single_shape=True)
+                                                          normalization=self.opt.normalization,
+                                                          class_choice=self.opt.cat,
+                                                          npoints=self.opt.number_points_eval,
+                                                          data_augmentation_Z_rotation=False,
+                                                          anisotropic_scaling=False,
+                                                          sample=False,
+                                                          shuffle=self.opt.randomize,
+                                                          random_translation=False,
+                                                          get_single_shape=True)
         self.dataloader_train = torch.utils.data.DataLoader(self.dataset_train, batch_size=1,
                                                             shuffle=self.opt.randomize,
                                                             num_workers=int(self.opt.workers), drop_last=False)
@@ -117,14 +126,14 @@ class Trainer(AbstractTrainer):
         Create testing dataset for matching used at inference
         """
         self.dataset_test = dataset_shapenet.ShapeNetSeg(mode="TEST", knn=False,
-                                                                              normalization=self.opt.normalization,
-                                                                              class_choice=self.opt.cat,
-                                                                              npoints=self.opt.number_points_eval,
-                                                                              data_augmentation_Z_rotation=False,
-                                                                              anisotropic_scaling=False,
-                                                                              sample=False,
-                                                                              random_translation=False,
-                                                                              get_single_shape=True)
+                                                         normalization=self.opt.normalization,
+                                                         class_choice=self.opt.cat,
+                                                         npoints=self.opt.number_points_eval,
+                                                         data_augmentation_Z_rotation=False,
+                                                         anisotropic_scaling=False,
+                                                         sample=False,
+                                                         random_translation=False,
+                                                         get_single_shape=True)
         self.dataloader_test = torch.utils.data.DataLoader(self.dataset_test, batch_size=1,
                                                            shuffle=False, num_workers=1, drop_last=False)
         self.len_dataset_test = len(self.dataset_test)

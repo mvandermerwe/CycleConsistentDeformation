@@ -2,6 +2,7 @@ import torch
 import my_utils
 import meter
 import extension.dist_chamfer_idx as ext
+import pdb
 
 distChamfer = ext.chamferDist()
 
@@ -132,6 +133,8 @@ def forward_chamfer(network, P1, P2, local_fix=None, latent=False, latent_P1=Non
     :param distChamfer: Chamfer distance function
     :return: P2 reconstructed from P1, latent vectors, chamfer outputs
     """
+    # pdb.set_trace()
+    
     P1_tmp = P1.transpose(2, 1).contiguous()
     P2_tmp = P2.transpose(2, 1).contiguous()
     if latent:

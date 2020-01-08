@@ -1,4 +1,5 @@
 import sys
+import pdb
 
 sys.path.append("./auxiliary/")
 sys.path.append("./extension/")
@@ -22,7 +23,7 @@ trainer.build_losses()
 
 for epoch in range(opt.nepoch):
     trainer.train_epoch()
-    trainer.test_epoch()
+    # trainer.test_epoch()
     trainer.dump_stats()
     trainer.save_network()
     trainer.increment_epoch()

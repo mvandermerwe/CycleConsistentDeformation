@@ -1,4 +1,4 @@
-from auxiliary.model_pointnetfeat import *
+from model_pointnetfeat import *
 import collections
 import my_utils
 
